@@ -42,5 +42,6 @@ public class CustomViewPager extends ViewPager {
             }
         }
         return super.executeKeyEvent(event);
+//        return false;
     }
 }

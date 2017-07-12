@@ -1,6 +1,5 @@
 package com.focustv;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -53,20 +52,6 @@ public class TestActivity extends FragmentActivity {
             @Override
             public int getItemCount() {
                 return 3;
-            }
-
-            @Override
-            public View.OnFocusChangeListener getFocusChangeListener() {
-                return new View.OnFocusChangeListener() {
-                    @Override
-                    public void onFocusChange(View v, boolean hasFocus) {
-                        if (hasFocus) {
-                            v.setBackgroundColor(getResources().getColor(R.color.yellow));
-                        } else {
-                            v.setBackgroundColor(getResources().getColor(R.color.fastlane_background));
-                        }
-                    }
-                };
             }
         };
         openTabHost.setAdapter(mAdapter);

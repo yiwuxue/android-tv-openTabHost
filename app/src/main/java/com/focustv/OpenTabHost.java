@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 /**
  * Created by liqi on 2017/7/7 0007.
@@ -26,6 +27,10 @@ public class OpenTabHost extends LinearLayout {
 
     private OnFocusChangeListener mFocusChangeListener;
 
+    private boolean mIsKeepFocus = true;
+
+    private boolean mIsOnlyUnFocus = false;
+
     public OpenTabHost(Context context) {
         super(context);
         init();
@@ -42,7 +47,6 @@ public class OpenTabHost extends LinearLayout {
     }
 
     private void init() {
-        setOrientation(HORIZONTAL);
         mFocusChangeListener = new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -54,13 +58,15 @@ public class OpenTabHost extends LinearLayout {
                             mIsInvokeFocusSearch = false;
                             mLastFocusedView.requestFocus();
                             return;
-//                            sendFocusChangeListenerToChild(mLastFocusedView, hasFocus);
                         }
                     }
                     mIsInvokeFocusSearch = false;
                     mLastFocusedView = v;
                 } else {
-                    sendFocusChangeListenerToChild(v, hasFocus);
+                    if (!mIsKeepFocus || !mIsOnlyUnFocus) {
+                        sendFocusChangeListenerToChild(v, hasFocus);
+                    }
+                    mIsOnlyUnFocus = false;
                 }
             }
         };
@@ -68,11 +74,22 @@ public class OpenTabHost extends LinearLayout {
 
     @Override
     public View focusSearch(View focused, int direction) {
-        if (direction == View.FOCUS_RIGHT || direction == FOCUS_LEFT) {
-            mIsInvokeFocusSearch = true;
+        if (getOrientation() == HORIZONTAL) {
+            if (direction == View.FOCUS_RIGHT || direction == FOCUS_LEFT) {
+                mIsInvokeFocusSearch = true;
+            } else {
+                mIsOnlyUnFocus = true;
+                mIsInvokeFocusSearch = false;
+            }
         } else {
-            mIsInvokeFocusSearch = false;
+            if (direction == View.FOCUS_RIGHT || direction == FOCUS_LEFT) {
+                mIsOnlyUnFocus = true;
+                mIsInvokeFocusSearch = false;
+            } else {
+                mIsInvokeFocusSearch = true;
+            }
         }
+
         return super.focusSearch(focused, direction);
     }
 
@@ -124,28 +141,32 @@ public class OpenTabHost extends LinearLayout {
          * 给用户消化焦点改变事件）
          * 设置用户需要消化焦点改变事件监听器
          *
-         * @return
          */
-        public abstract OnFocusChangeListener getFocusChangeListener();
     }
 
     private void sendFocusChangeListenerToChild(View v, boolean hasFocus) {
-        if (mAdapter != null && mAdapter.getFocusChangeListener() != null) {
-            mAdapter.getFocusChangeListener().onFocusChange(v, hasFocus);
-        }
+        int index = indexOfChild(v);
         if (hasFocus) {
-            int child = indexOfChild(v);
-            if (child != -1) {
-                mCurrentTab = child;
-                if (mTabChangeListener != null) {
-                    mTabChangeListener.onTabChange(child);
-                }
+            if (index != -1) {
+                mCurrentTab = index;
             }
+        }
+        if (mTabChangeListener != null) {
+            TextView title = (TextView) v.findViewById(R.id.title);
+            mTabChangeListener.onTabChange(v, title, index, hasFocus);
         }
     }
 
     public interface TabChangeListener {
-        void onTabChange(int position);
+        void onTabChange(View parentView, TextView title, int position, boolean hasFocus);
+    }
+
+    /**
+     * 设置当前选中的Tab
+     * @param position tab的position
+     */
+    public void setCurrentTab(int position) {
+
     }
 
 }
