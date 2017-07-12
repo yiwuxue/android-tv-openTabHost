@@ -4,10 +4,20 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
+import android.support.v17.leanback.widget.BaseOnItemViewClickedListener;
+import android.support.v17.leanback.widget.BaseOnItemViewSelectedListener;
 import android.support.v17.leanback.widget.ItemBridgeAdapter;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
+import android.support.v17.leanback.widget.OnChildViewHolderSelectedListener;
+import android.support.v17.leanback.widget.OnItemViewClickedListener;
+import android.support.v17.leanback.widget.OnItemViewSelectedListener;
+import android.support.v17.leanback.widget.Presenter;
+import android.support.v17.leanback.widget.Row;
+import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.VerticalGridView;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +31,7 @@ import java.util.List;
  */
 
 public class LiveActivity extends Activity {
+    private final String TAG = "LiveActivity";
     private static final int NUM_ROWS = 2;
     private static final int NUM_COLS = 6;
     private ArrayObjectAdapter mRowsAdapter;
@@ -28,12 +39,56 @@ public class LiveActivity extends Activity {
     private ItemBridgeAdapter mItemBridgeAdapter;
     private OpenTabHost openTabHost;
     private OpenTabHost.Adapter mAdapter;
+    private BaseOnItemViewClickedListener mOnItemViewClickedListener = new ItemViewClickedListener();
+    //    private BaseOnItemViewSelectedListener mOnItemViewSelectedListener = new ItemViewSelectedListener();
+    private OnChildViewHolderSelectedListener mRowSelectedListener = new OnChildViewHolderSelectedListener() {
+        @Override
+        public void onChildViewHolderSelected(RecyclerView parent, RecyclerView.ViewHolder child, int position, int subposition) {
+            Log.d(TAG, "on child view holder:" + position);
+        }
+    };
+    private ItemBridgeAdapter.AdapterListener mAdapterListener = new ItemBridgeAdapter.AdapterListener() {
+        @Override
+        public void onAddPresenter(Presenter presenter, int type) {
+            super.onAddPresenter(presenter, type);
+        }
 
+        @Override
+        public void onCreate(ItemBridgeAdapter.ViewHolder viewHolder) {
+            super.onCreate(viewHolder);
+        }
+
+        @Override
+        public void onBind(ItemBridgeAdapter.ViewHolder viewHolder) {
+        }
+
+        @Override
+        public void onUnbind(ItemBridgeAdapter.ViewHolder viewHolder) {
+            super.onUnbind(viewHolder);
+        }
+
+        @Override
+        public void onAttachedToWindow(ItemBridgeAdapter.ViewHolder viewHolder) {
+            RowPresenter rowPresenter = (RowPresenter) viewHolder.getPresenter();
+            RowPresenter.ViewHolder rowVh = rowPresenter.getRowViewHolder(viewHolder.getViewHolder());
+//            rowVh.setOnItemViewSelectedListener(mOnItemViewSelectedListener);
+            rowVh.setOnItemViewClickedListener(mOnItemViewClickedListener);
+        }
+
+        @Override
+        public void onDetachedFromWindow(ItemBridgeAdapter.ViewHolder viewHolder) {
+            super.onDetachedFromWindow(viewHolder);
+        }
+    };
+
+    @SuppressWarnings("RestrictedApi")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activtity_live);
         mVerticalGridView = (VerticalGridView) findViewById(R.id.vertical_grid_view);
+        mVerticalGridView.setOnChildViewHolderSelectedListener(mRowSelectedListener);
+//        mVerticalGridView.setSelectedPosition();
         initView();
     }
 
@@ -55,6 +110,7 @@ public class LiveActivity extends Activity {
             mRowsAdapter.add(new ListRow(listRowAdapter));
         }
         mItemBridgeAdapter = new ItemBridgeAdapter(mRowsAdapter);
+        mItemBridgeAdapter.setAdapterListener(mAdapterListener);
         mVerticalGridView.setAdapter(mItemBridgeAdapter);
         openTabHost = (OpenTabHost) findViewById(R.id.open_tab_host);
         mAdapter = new OpenTabHost.Adapter() {
@@ -87,5 +143,21 @@ public class LiveActivity extends Activity {
             }
         });
         openTabHost.selectPosition(0);
+    }
+
+    class ItemViewClickedListener implements OnItemViewClickedListener {
+
+        @Override
+        public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item, RowPresenter.ViewHolder rowViewHolder, Row row) {
+            Log.d(TAG, "click row:" + row);
+        }
+    }
+
+    private final class ItemViewSelectedListener implements OnItemViewSelectedListener {
+
+        @Override
+        public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item, RowPresenter.ViewHolder rowViewHolder, Row row) {
+            Log.d(TAG, "selected row:" + row);
+        }
     }
 }
