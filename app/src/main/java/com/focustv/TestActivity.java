@@ -22,8 +22,8 @@ import java.util.ArrayList;
  */
 
 public class TestActivity extends FragmentActivity {
-    private OpenTabHost openTabHost;
-    private OpenTabHost.Adapter mAdapter;
+    private CustomTabHost openTabHost;
+    private CustomTabHost.Adapter mAdapter;
     private TestPageAdapter testPageAdapter;
     private ArrayList<Fragment> fragments = new ArrayList<>();
     private ViewPager viewPager;
@@ -32,9 +32,9 @@ public class TestActivity extends FragmentActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-        openTabHost = (OpenTabHost) findViewById(R.id.open_tab_host);
+        openTabHost = (CustomTabHost) findViewById(R.id.open_tab_host);
         viewPager = (ViewPager) findViewById(R.id.view_pager);
-        mAdapter = new OpenTabHost.Adapter() {
+        mAdapter = new CustomTabHost.Adapter() {
 
             @Override
             public View getView(ViewGroup parent, int position) {

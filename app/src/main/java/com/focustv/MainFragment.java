@@ -27,11 +27,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v17.leanback.app.BackgroundManager;
 import android.support.v17.leanback.app.BrowseFragment;
+import android.support.v17.leanback.app.HeadersFragment;
+import android.support.v17.leanback.app.RowsFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
+import android.support.v17.leanback.widget.ObjectAdapter;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
 import android.support.v17.leanback.widget.OnItemViewSelectedListener;
 import android.support.v17.leanback.widget.Presenter;
@@ -41,7 +44,7 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
+import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,6 +53,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.focustv.fragment.CustomHeaderFragment;
+import com.focustv.fragment.CustomRowFragment;
 
 import static android.view.View.GONE;
 
@@ -79,9 +84,22 @@ public class MainFragment extends BrowseFragment {
 
         setupUIElements();
 
-        loadRows();
-
         setupEventListeners();
+        getMainFragmentRegistry().registerFragment(ListRow.class, new MyFragmentFactory());
+        enableMainFragmentScaling(false);
+        enableRowScaling(false);
+
+        loadRows();
+//        if(getMainFragment() instanceof RowsFragment){
+//
+//        }
+
+//        ViewGroup.MarginLayoutParams lp;
+//        View containerList;
+//        containerList = getHeadersFragment().getView();
+//        lp = (ViewGroup.MarginLayoutParams) containerList.getLayoutParams();
+//        lp.setMarginStart(0);
+//        containerList.setLayoutParams(lp);
     }
 
     @Override
@@ -122,6 +140,7 @@ public class MainFragment extends BrowseFragment {
         mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
 
         setAdapter(mRowsAdapter);
+        setBrandColor(getResources().getColor(R.color.fastlane_background));
 
     }
 
@@ -273,4 +292,33 @@ public class MainFragment extends BrowseFragment {
         super.onStart();
         getTitleViewAdapter().setAnimationEnabled(false);
     }
+
+    @Override
+    public void installTitleView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        super.installTitleView(inflater, parent, savedInstanceState);
+//        View view = parent.getChildAt(parent.getChildCount() - 1);
+//        if (view != null) {
+//            view.setVisibility(GONE);
+//        }
+    }
+
+    class MyFragmentFactory extends FragmentFactory<CustomRowFragment> {
+
+        @Override
+        public CustomRowFragment createFragment(Object row) {
+            return new CustomRowFragment();
+        }
+    }
+
+    @Override
+    public HeadersFragment onCreateHeadersFragment() {
+        return new CustomHeaderFragment();
+    }
+
+    @Override
+    public void setAdapter(ObjectAdapter adapter) {
+        super.setAdapter(adapter);
+    }
+
+
 }

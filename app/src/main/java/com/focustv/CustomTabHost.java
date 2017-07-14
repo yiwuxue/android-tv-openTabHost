@@ -3,6 +3,7 @@ package com.focustv;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -12,7 +13,7 @@ import android.widget.TextView;
  * Created by liqi on 2017/7/7 0007.
  */
 
-public class OpenTabHost extends LinearLayout {
+public class CustomTabHost extends LinearLayout {
     private static final String TAG = "OpenTabHost";
     //是否在左右移动时候会调focusSearch方法
     private boolean mIsInvokeFocusSearch = false;
@@ -23,25 +24,35 @@ public class OpenTabHost extends LinearLayout {
     //当前选中tab
     private int mCurrentTab = -1;
 
+    //Tab切换监听器
     private TabChangeListener mTabChangeListener;
 
+    //CustomTabHost每个子View的OnFocusChangeListener
     private OnFocusChangeListener mFocusChangeListener;
 
+    //焦点水平移动时候事件拦截监听器
+    private OnKeyInterceptListener mHorizontalKeyInterceptListener;
+
+    //焦点竖直移动时候事件拦截监听器
+    private OnKeyInterceptListener mVerticalKeyInterceptListener;
+
+    //在CustomTabHost失去焦点的时候是否保持最后一个获取焦点的View在选中的状态
     private boolean mIsKeepFocus = true;
 
+    //CustomTabHost仅仅失去焦点没有获取到焦点
     private boolean mIsOnlyUnFocus = false;
 
-    public OpenTabHost(Context context) {
+    public CustomTabHost(Context context) {
         super(context);
         init();
     }
 
-    public OpenTabHost(Context context, @Nullable AttributeSet attrs) {
+    public CustomTabHost(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public OpenTabHost(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public CustomTabHost(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
@@ -151,10 +162,7 @@ public class OpenTabHost extends LinearLayout {
                 mCurrentTab = index;
             }
         }
-        if (mTabChangeListener != null) {
-            TextView title = (TextView) v.findViewById(R.id.title);
-            mTabChangeListener.onTabChange(v, title, index, hasFocus);
-        }
+        invokeTabChangeListener(v, index, hasFocus);
     }
 
     public interface TabChangeListener {
@@ -163,10 +171,61 @@ public class OpenTabHost extends LinearLayout {
 
     /**
      * 设置当前选中的Tab
+     *
      * @param position tab的position
      */
     public void setCurrentTab(int position) {
-
+        if (position > -1 && position < getChildCount() && position != mCurrentTab) {
+            if (mLastFocusedView != null) {
+                invokeTabChangeListener(mLastFocusedView, mCurrentTab, false);
+            }
+            mCurrentTab = position;
+            mLastFocusedView = getChildAt(position);
+            invokeTabChangeListener(mLastFocusedView, mCurrentTab, true);
+        }
     }
 
+
+    private void invokeTabChangeListener(View parentView, int index, boolean hasFocus) {
+        if (mTabChangeListener != null) {
+            TextView title = (TextView) parentView.findViewById(R.id.title);
+            mTabChangeListener.onTabChange(parentView, title, index, hasFocus);
+        }
+    }
+
+
+    public interface OnKeyInterceptListener {
+        boolean executeKeyEvent(KeyEvent keyEvent, int keyCode);
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        boolean handled = super.dispatchKeyEvent(event);
+        if (handled) {
+            return handled;
+        }
+        switch (event.getKeyCode()) {
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                if (mHorizontalKeyInterceptListener != null) {
+                    return mHorizontalKeyInterceptListener.executeKeyEvent(event, event.getKeyCode());
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_DPAD_UP:
+                if (mVerticalKeyInterceptListener != null) {
+                    return mVerticalKeyInterceptListener.executeKeyEvent(event, event.getKeyCode());
+                }
+                break;
+        }
+        return handled;
+    }
+
+    public void setHorizontalKeyInterceptListener(OnKeyInterceptListener horizontalKeyInterceptListener) {
+        mHorizontalKeyInterceptListener = horizontalKeyInterceptListener;
+    }
+
+    public void setVerticalKeyInterceptListener(OnKeyInterceptListener verticalKeyInterceptListener) {
+        mVerticalKeyInterceptListener = verticalKeyInterceptListener;
+    }
 }

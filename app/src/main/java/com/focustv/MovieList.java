@@ -5,7 +5,7 @@ import java.util.List;
 
 public final class MovieList {
     public static final String MOVIE_CATEGORY[] = {
-            "zhibo",
+            "Category Zero",
             "Category One",
             "Category Two",
             "Category Three",

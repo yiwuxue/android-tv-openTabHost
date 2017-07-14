@@ -7,12 +7,12 @@
     android:clipChildren="false"
     android:clipToPadding="false" >
 
-    <com.focustv.OpenTabHost
+    <com.focustv.CustomTabHost
         android:id="@+id/open_tab_host"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-    </com.focustv.OpenTabHost>
+    </com.focustv.CustomTabHost>
 
     <com.focustv.CustomViewPager
         android:id="@+id/view_pager"

@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.BaseOnItemViewClickedListener;
-import android.support.v17.leanback.widget.BaseOnItemViewSelectedListener;
 import android.support.v17.leanback.widget.ItemBridgeAdapter;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
@@ -18,6 +17,7 @@ import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.VerticalGridView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,14 +37,15 @@ public class LiveActivity extends Activity {
     private ArrayObjectAdapter mRowsAdapter;
     private VerticalGridView mVerticalGridView;
     private ItemBridgeAdapter mItemBridgeAdapter;
-    private OpenTabHost openTabHost;
-    private OpenTabHost.Adapter mAdapter;
+    private CustomTabHost openTabHost;
+    private CustomTabHost.Adapter mAdapter;
     private BaseOnItemViewClickedListener mOnItemViewClickedListener = new ItemViewClickedListener();
     //    private BaseOnItemViewSelectedListener mOnItemViewSelectedListener = new ItemViewSelectedListener();
     private OnChildViewHolderSelectedListener mRowSelectedListener = new OnChildViewHolderSelectedListener() {
         @Override
         public void onChildViewHolderSelected(RecyclerView parent, RecyclerView.ViewHolder child, int position, int subposition) {
             Log.d(TAG, "on child view holder:" + position);
+            openTabHost.setCurrentTab(position);
         }
     };
     private ItemBridgeAdapter.AdapterListener mAdapterListener = new ItemBridgeAdapter.AdapterListener() {
@@ -112,8 +113,14 @@ public class LiveActivity extends Activity {
         mItemBridgeAdapter = new ItemBridgeAdapter(mRowsAdapter);
         mItemBridgeAdapter.setAdapterListener(mAdapterListener);
         mVerticalGridView.setAdapter(mItemBridgeAdapter);
-        openTabHost = (OpenTabHost) findViewById(R.id.open_tab_host);
-        mAdapter = new OpenTabHost.Adapter() {
+        openTabHost = (CustomTabHost) findViewById(R.id.open_tab_host);
+        openTabHost.setHorizontalKeyInterceptListener(new CustomTabHost.OnKeyInterceptListener() {
+            @Override
+            public boolean executeKeyEvent(KeyEvent keyEvent, int keyCode) {
+                return false;
+            }
+        });
+        mAdapter = new CustomTabHost.Adapter() {
 
             @Override
             public View getView(ViewGroup parent, int position) {
@@ -130,7 +137,7 @@ public class LiveActivity extends Activity {
             }
         };
         openTabHost.setAdapter(mAdapter);
-        openTabHost.setTabChangeListener(new OpenTabHost.TabChangeListener() {
+        openTabHost.setTabChangeListener(new CustomTabHost.TabChangeListener() {
             @Override
             public void onTabChange(View parentView, TextView title, int position, boolean hasFocus) {
                 if (title != null) {
