@@ -14,6 +14,7 @@
 
 package com.focustv;
 
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -45,6 +46,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,6 +57,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.focustv.fragment.CustomHeaderFragment;
 import com.focustv.fragment.CustomRowFragment;
+import com.focustv.presenter.ItemTestPresenter;
 
 import static android.view.View.GONE;
 
@@ -115,7 +118,7 @@ public class MainFragment extends BrowseFragment {
         List<Movie> list = MovieList.setupMovies();
 
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
-        CardPresenter cardPresenter = new CardPresenter();
+        ItemTestPresenter cardPresenter = new ItemTestPresenter();
 
         int i;
         for (i = 0; i < NUM_ROWS; i++) {
@@ -290,7 +293,7 @@ public class MainFragment extends BrowseFragment {
     @Override
     public void onStart() {
         super.onStart();
-        getTitleViewAdapter().setAnimationEnabled(false);
+//        getTitleViewAdapter().setAnimationEnabled(false);
     }
 
     @Override
@@ -320,5 +323,21 @@ public class MainFragment extends BrowseFragment {
         super.setAdapter(adapter);
     }
 
-
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Class cls = null;
+        try {
+            cls = Class.forName("android.support.v17.leanback.app.BrowseFragment");
+            Field field = cls.getDeclaredField("mContainerListMarginStart");
+            field.setAccessible(true);
+            field.set(this,0);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
 }
