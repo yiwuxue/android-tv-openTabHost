@@ -32,7 +32,7 @@ import java.util.List;
 
 public class LiveActivity extends Activity {
     private final String TAG = "LiveActivity";
-    private static final int NUM_ROWS = 2;
+    private static final int NUM_ROWS = LiveList.CATEGORIES.length;
     private static final int NUM_COLS = 6;
     private ArrayObjectAdapter mRowsAdapter;
     private VerticalGridView mVerticalGridView;
@@ -138,6 +138,7 @@ public class LiveActivity extends Activity {
         };
         openTabHost.setAdapter(mAdapter);
         openTabHost.setTabChangeListener(new CustomTabHost.TabChangeListener() {
+            @SuppressWarnings("RestrictedApi")
             @Override
             public void onTabChange(View parentView, TextView title, int position, boolean hasFocus) {
                 if (title != null) {
@@ -146,6 +147,9 @@ public class LiveActivity extends Activity {
                     } else {
                         title.setTextColor(getResources().getColor(R.color.yellow));
                     }
+                }
+                if (!mVerticalGridView.isFocused()) {
+                    mVerticalGridView.setSelectedPositionSmooth(position);
                 }
             }
         });

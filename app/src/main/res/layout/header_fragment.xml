@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/browse_headers_root"
+    android:layout_width="@dimen/lb_browse_headers_width"
+    android:layout_height="match_parent"
+    android:elevation="@dimen/lb_browse_headers_z"
+    android:paddingEnd="@dimen/lb_browse_header_padding_end"
+    android:transitionGroup="true">
+
+    <com.focustv.widget.BrowseHeaderVerticalGridView
+        android:id="@+id/browse_headers"
+        style="?attr/headersVerticalGridStyle"
+        android:layout_width="@dimen/lb_browse_headers_width"
+        android:layout_height="match_parent" />
+
+    <View
+        android:id="@+id/fade_out_edge"
+        android:layout_width="@dimen/lb_browse_header_fading_length"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/lb_headers_right_fading"></View>
+</RelativeLayout>

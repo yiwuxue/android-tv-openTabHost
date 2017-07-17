@@ -9,12 +9,15 @@ import android.support.v17.leanback.widget.PresenterSelector;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowHeaderPresenter;
 import android.support.v17.leanback.widget.SectionRow;
+import android.support.v17.leanback.widget.VerticalGridView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.focustv.*;
 import com.focustv.CustomRowHeaderPresenter;
+
+import java.lang.reflect.Field;
 
 
 /**
@@ -32,12 +35,11 @@ public class CustomHeaderFragment extends HeadersFragment {
         setPresenterSelector(sHeaderPresenter);
     }
 
+    @SuppressWarnings("RestrictedApi")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-//        getVerticalGridView().setScrollEnabled(false);
+        View view = init(inflater, container);
         getVerticalGridView().setFocusScrollStrategy(1);
-        getVerticalGridView().setHasFixedSize(true);
         return view;
     }
 
@@ -49,5 +51,32 @@ public class CustomHeaderFragment extends HeadersFragment {
     @Override
     public void setSelectedPosition(int position) {
         super.setSelectedPosition(position);
+    }
+
+
+    private View init(LayoutInflater inflater, ViewGroup container) {
+        View view = inflater.inflate(R.layout.header_fragment, container, false);
+        Class cls = null;
+        try {
+            cls = Class.forName("android.support.v17.leanback.app.BaseRowFragment");
+            Field field = cls.getDeclaredField("mVerticalGridView");
+            field.setAccessible(true);
+            field.set(this, (VerticalGridView) view.findViewById(R.id.browse_headers));
+            Field field1 = cls.getDeclaredField("mPendingTransitionPrepare");
+            field1.setAccessible(true);
+            boolean prepare = (boolean) field1.get(this);
+            if (prepare) {
+                field1.set(this, false);
+                onTransitionPrepare();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        return view;
     }
 }
